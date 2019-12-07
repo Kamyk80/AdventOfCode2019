@@ -1,17 +1,19 @@
 ﻿using System.Collections.Generic;
 
 #pragma warning disable 8509
-namespace AdventOfCode2019.Day05
+namespace AdventOfCode2019.Day07
 {
     public class Computer
     {
         private IList<int> _program;
+        private Queue<int> _input;
         private int _pointer;
         private int _output;
 
-        public int Run(IEnumerable<int> program, int input)
+        public int Run(IEnumerable<int> program, IEnumerable<int> input)
         {
             _program = new List<int>(program);
+            _input = new Queue<int>(input);
             _pointer = 0;
 
             while (true)
@@ -27,7 +29,7 @@ namespace AdventOfCode2019.Day05
                         Multiply(mode1, mode2);
                         break;
                     case 3:
-                        Read(input);
+                        Read();
                         break;
                     case 4:
                         Write(mode1);
@@ -74,9 +76,9 @@ namespace AdventOfCode2019.Day05
             _pointer += 4;
         }
 
-        private void Read(int input)
+        private void Read()
         {
-            SetValue(_program[_pointer + 1], input);
+            SetValue(_program[_pointer + 1], _input.Dequeue());
             _pointer += 2;
         }
 

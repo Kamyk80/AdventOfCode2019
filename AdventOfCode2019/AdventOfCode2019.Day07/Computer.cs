@@ -5,16 +5,26 @@ namespace AdventOfCode2019.Day07
 {
     public class Computer
     {
-        private IList<int> _program;
-        private Queue<int> _input;
+        private readonly IList<int> _program;
+        private readonly Queue<int> _input;
         private int _pointer;
-        private int _output;
 
-        public int Run(IEnumerable<int> program, IEnumerable<int> input)
+        public Computer(IEnumerable<int> program)
         {
             _program = new List<int>(program);
-            _input = new Queue<int>(input);
+            _input = new Queue<int>();
             _pointer = 0;
+        }
+
+        public Computer(IEnumerable<int> program, int phase)
+            : this(program)
+        {
+            _input.Enqueue(phase);
+        }
+
+        public int? Run(int input)
+        {
+            _input.Enqueue(input);
 
             while (true)
             {
@@ -32,8 +42,7 @@ namespace AdventOfCode2019.Day07
                         Read();
                         break;
                     case 4:
-                        Write(mode1);
-                        break;
+                        return Write(mode1);
                     case 5:
                         JumpIfTrue(mode1, mode2);
                         break;
@@ -47,7 +56,7 @@ namespace AdventOfCode2019.Day07
                         Equals(mode1, mode2);
                         break;
                     default:
-                        return _output;
+                        return null;
                 }
             }
         }
@@ -82,10 +91,11 @@ namespace AdventOfCode2019.Day07
             _pointer += 2;
         }
 
-        private void Write(int mode1)
+        private int Write(int mode1)
         {
-            _output = GetValue(_program[_pointer + 1], mode1);
+            var output = GetValue(_program[_pointer + 1], mode1);
             _pointer += 2;
+            return output;
         }
 
         private void JumpIfTrue(int mode1, int mode2)

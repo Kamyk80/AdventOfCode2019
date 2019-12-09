@@ -5,7 +5,7 @@ namespace AdventOfCode2019.Day07
 {
     public class Computer
     {
-        private readonly IList<int> _program;
+        private readonly List<int> _program;
         private readonly Queue<int> _input;
         private int _pointer;
 

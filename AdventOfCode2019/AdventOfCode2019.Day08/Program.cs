@@ -22,7 +22,7 @@ namespace AdventOfCode2019.Day08
 
             layers.First()
                 .Select((c, i) => layers.Select(l => l[i]).ToArray())
-                .Select((l, i) => new {c = l.Aggregate((cur, next) => cur == '2' ? next : cur), i})
+                .Select((l, i) => new {c = l.First(c => c != '2'), i})
                 .GroupBy(p => p.i / 25, p => p.c)
                 .Select(g => g.Select(c => c == '0' ? ' ' : '█').ToArray())
                 .ToList()

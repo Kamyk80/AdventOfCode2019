@@ -71,7 +71,7 @@ namespace AdventOfCode2019.Day09
             var opcode = instruction % 100;
             var mode1 = instruction % 1000 - opcode;
             var mode2 = instruction % 10000 - mode1 - opcode;
-            var mode3 = instruction % 100000 - mode1 - opcode;
+            var mode3 = instruction % 100000 - mode2 - mode1 - opcode;
 
             return (opcode, mode1 / 100, mode2 / 1000, mode3 / 10000);
         }

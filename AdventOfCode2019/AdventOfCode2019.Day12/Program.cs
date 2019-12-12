@@ -18,9 +18,7 @@ namespace AdventOfCode2019.Day12
         public void ApplyGravity(IEnumerable<Moon> moons)
         {
             foreach (var moon in moons.Except(new[] {this}))
-            {
                 ApplyGravity(moon);
-            }
         }
 
         private void ApplyGravity(Moon moon)
@@ -76,8 +74,31 @@ namespace AdventOfCode2019.Day12
                 })
                 .ToList();
 
-            for (var i = 0; i < 1000; i++)
+            var startX = moons.Select(m => m.PosX).ToArray();
+            var startY = moons.Select(m => m.PosY).ToArray();
+            var startZ = moons.Select(m => m.PosZ).ToArray();
+
+            var stepsX = 0;
+            var stepsY = 0;
+            var stepsZ = 0;
+
+            for (var steps = 0; stepsX == 0 || stepsY == 0 || stepsZ == 0; steps++)
             {
+                if (stepsX == 0 && moons.Select((m, i) => m.PosX == startX[i] && m.VelX == 0).All(b => b))
+                    stepsX = steps;
+
+                if (stepsY == 0 && moons.Select((m, i) => m.PosY == startY[i] && m.VelY == 0).All(b => b))
+                    stepsY = steps;
+
+                if (stepsZ == 0 && moons.Select((m, i) => m.PosZ == startZ[i] && m.VelZ == 0).All(b => b))
+                    stepsZ = steps;
+
+                if (steps == 1000)
+                    Console.WriteLine(moons.Sum(m => m.TotalEnergy()));
+
+                if (stepsX > 0 && stepsY > 0 && stepsZ > 0)
+                    Console.Write(LeastCommonMultiple(LeastCommonMultiple(stepsX, stepsY), stepsZ));
+
                 foreach (var moon in moons)
                     moon.ApplyGravity(moons);
 
@@ -85,8 +106,18 @@ namespace AdventOfCode2019.Day12
                     moon.Move();
             }
 
-            Console.WriteLine(moons.Sum(m => m.TotalEnergy()));
             Console.ReadKey(true);
+        }
+
+        private static long LeastCommonMultiple(long a, long b)
+            => a * b / GreatestCommonDivisor(a, b);
+
+        private static long GreatestCommonDivisor(long a, long b)
+        {
+            while (a != b)
+                if (a > b) a -= b;
+                else b -= a;
+            return a;
         }
     }
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-#pragma warning disable 8509
 namespace AdventOfCode2019.Day11
 {
     public class Computer
@@ -181,4 +180,3 @@ namespace AdventOfCode2019.Day11
         }
     }
 }
-#pragma warning restore 8509

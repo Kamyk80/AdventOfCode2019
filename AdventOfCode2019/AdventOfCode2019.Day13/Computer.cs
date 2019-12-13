@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-#pragma warning disable 8509
 namespace AdventOfCode2019.Day13
 {
     public class Computer
@@ -12,6 +11,8 @@ namespace AdventOfCode2019.Day13
         private readonly List<int> _output;
         private long _pointer;
         private long _base;
+
+        public bool Finished { get; private set; }
 
         public Computer(IEnumerable<long> program)
         {
@@ -38,6 +39,8 @@ namespace AdventOfCode2019.Day13
                         Multiply(mode1, mode2, mode3);
                         break;
                     case 3:
+                        if (_input.Count == 0)
+                            return _output;
                         Read(mode1);
                         break;
                     case 4:
@@ -59,9 +62,17 @@ namespace AdventOfCode2019.Day13
                         AdjustBase(mode1);
                         break;
                     default:
+                        Finished = true;
                         return _output;
                 }
             }
+        }
+
+        public IEnumerable<int> Continue(int input)
+        {
+            _input.Enqueue(input);
+            _output.Clear();
+            return Run();
         }
 
         private static (long opcode, long mode1, long mode2, long mode3) DecodeInstruction(long instruction)
@@ -173,4 +184,3 @@ namespace AdventOfCode2019.Day13
         }
     }
 }
-#pragma warning restore 8509

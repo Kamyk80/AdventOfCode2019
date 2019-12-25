@@ -16,21 +16,27 @@ namespace AdventOfCode2019.Day24
                 .Select(l => l.ToArray())
                 .ToArray();
 
+            Console.WriteLine(RunSingle(bugs));
+            Console.WriteLine(RunLevels(bugs));
+            Console.ReadKey(true);
+        }
+
+        private static int RunSingle(char[][] bugs)
+        {
             var ratings = new HashSet<int>();
-            var rating = Rating(bugs);
+            var rating = RatingSingle(bugs);
 
             while (!ratings.Contains(rating))
             {
                 ratings.Add(rating);
-                bugs = Live(bugs);
-                rating = Rating(bugs);
+                bugs = LiveSingle(bugs);
+                rating = RatingSingle(bugs);
             }
 
-            Console.WriteLine(rating);
-            Console.ReadKey(true);
+            return rating;
         }
 
-        private static char[][] Live(char[][] cur)
+        private static char[][] LiveSingle(char[][] cur)
         {
             var next = new char[cur.Length][];
             for (var y = 0; y < cur.Length; y++)
@@ -63,7 +69,7 @@ namespace AdventOfCode2019.Day24
             return next;
         }
 
-        private static int Rating(char[][] bugs)
+        private static int RatingSingle(char[][] bugs)
         {
             var rating = 0;
             var bit = 1;
@@ -82,6 +88,92 @@ namespace AdventOfCode2019.Day24
             }
 
             return rating;
+        }
+
+        private static int RunLevels(char[][] bugs)
+        {
+            var curLevels = new List<char[][]>(new[] {bugs});
+
+            for (var time = 0; time < 200; time++)
+            {
+                if (curLevels.First().Any(r => r.Any(c => c == '#')))
+                {
+                    curLevels = curLevels.Prepend(EmptyLevel()).ToList();
+                }
+
+                if (curLevels.Last().Any(r => r.Any(c => c == '#')))
+                {
+                    curLevels = curLevels.Append(EmptyLevel()).ToList();
+                }
+
+                var nextLevels = new List<char[][]>();
+
+                for (var level = 0; level < curLevels.Count; level++)
+                {
+                    var curLevel = curLevels[level];
+                    var outerLevel = level > 0 ? curLevels[level - 1] : null;
+                    var innerLevel = level < curLevels.Count - 1 ? curLevels[level + 1] : null;
+
+                    nextLevels.Add(LiveLevel(curLevel, outerLevel, innerLevel));
+                }
+
+                curLevels = nextLevels;
+            }
+
+            return curLevels.Sum(l => l.Sum(r => r.Count(c => c == '#')));
+        }
+
+        private static char[][] EmptyLevel()
+        {
+            return Enumerable.Repeat(Enumerable.Repeat('.', 5).ToArray(), 5).ToArray();
+        }
+
+        private static char[][] LiveLevel(char[][] curLevel, char[][] outerLevel, char[][] innerLevel)
+        {
+            var nextLevel = new char[5][];
+
+            for (var y = 0; y < 5; y++)
+            {
+                nextLevel[y] = new char[5];
+                for (var x = 0; x < 5; x++)
+                {
+                    nextLevel[y][x] = curLevel[y][x];
+
+                    if (x == 2 && y == 2)
+                    {
+                        continue;
+                    }
+
+                    var bugs = Offsets
+                        .Sum(o => (x: x + o.dx, y: y + o.dy) switch
+                        {
+                            var (_, y1) when y1 < 0 => outerLevel?[1][2] == '#' ? 1 : 0,
+                            var (_, y1) when y1 > 4 => outerLevel?[3][2] == '#' ? 1 : 0,
+                            var (x1, _) when x1 < 0 => outerLevel?[2][1] == '#' ? 1 : 0,
+                            var (x1, _) when x1 > 4 => outerLevel?[2][3] == '#' ? 1 : 0,
+                            var (x1, y1) when x1 == 2 && y1 == 2 => (x, y) switch
+                            {
+                                var (_, y2) when y2 == 1 => innerLevel?[0].Count(c => c == '#'),
+                                var (_, y2) when y2 == 3 => innerLevel?[4].Count(c => c == '#'),
+                                var (x2, _) when x2 == 1 => innerLevel?.Count(r => r[0] == '#'),
+                                var (x2, _) when x2 == 3 => innerLevel?.Count(r => r[4] == '#')
+                            },
+                            var (x1, y1) => curLevel[y1][x1] == '#' ? 1 : 0
+                        });
+
+                    if (curLevel[y][x] == '#' && bugs != 1)
+                    {
+                        nextLevel[y][x] = '.';
+                    }
+
+                    if (curLevel[y][x] == '.' && bugs >= 1 && bugs <= 2)
+                    {
+                        nextLevel[y][x] = '#';
+                    }
+                }
+            }
+
+            return nextLevel;
         }
     }
 }
